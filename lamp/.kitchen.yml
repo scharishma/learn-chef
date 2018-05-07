@@ -1,0 +1,50 @@
+---
+driver:
+  name: ec2
+  region: us-east-1
+  subnet_id: subnet-276b7b08
+  security_group_ids: ["sg-af481ee6"]
+  image_id: ami-43a15f3e
+  instance_type: t2.micro
+  aws_ssh_key_id: scharishma
+  associate_public_ip: true
+  tags:
+    Name  : sql
+    Owner: saicharishma.boddu
+    Environment: Testing
+    Project: REAN-Internal
+    ExpirationDate: "2018-05-08"
+
+transport:
+  ssh_key: ~/.ssh/id_rsa
+  connection_timeout: 10
+  connection_retries: 5
+  username: ubuntu
+  name: ssh
+
+provisioner:
+  name: chef_solo
+  require_chef_omnibus: 13.8.3
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-16.04
+    block_device_mappings:
+    - device_name: /dev/sdb
+      ebs:
+      volume_type: gp2
+      virtual_name: test
+      volume_size: 50
+      delete_on_termination: true
+
+suites:
+  - name: default
+    run_list:
+    - recipe[lamp::default]
+    attributes:
+    verifier:
+    inspec_tests:
+    - test/smoke/default/
+ 
